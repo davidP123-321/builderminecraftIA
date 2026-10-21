@@ -1,0 +1,46 @@
+# Minecraft Builder Pro
+
+Application WPF en C# qui utilise Ollama pour générer un plan de schéma Minecraft à partir d'un prompt texte.
+
+## Fonctionnalités
+
+- interface graphique WPF
+- génération de plan via Ollama
+- aperçu 2D du schéma
+- aperçu 3D basique
+- export JSON
+- export `.schem` de base
+
+## Prérequis
+
+- .NET 8 SDK
+- Windows (WPF)
+- Ollama installé et en cours d'exécution
+- un modèle Ollama téléchargé, par exemple : `llama3.1:8b`
+
+## Lancement
+
+1. Démarrer Ollama :
+   ```bash
+   ollama serve
+   ```
+
+2. Télécharger un modèle :
+   ```bash
+   ollama pull llama3.1:8b
+   ```
+
+3. Lancer l'application :
+   ```bash
+   dotnet run
+   ```
+
+## Exemple de prompt
+
+- "Maison médiévale en pierre, 2 étages, 3 chambres, salon, cuisine, cave, entrée centrale, toit à pignon"
+- "Base souterraine de survival avec ferme automatique, four, coffres, atelier, chambre"
+- "Château en pierre, grande salle, tours, cave, fenêtres, style majestueux"
+
+## Remarque
+
+Cette version montre la logique de génération de schéma avec Ollama + WPF + prévisualisation. L'export .schem est un export de structure de base, idéal pour une extension plus avancée vers un format Minecraft complet.
