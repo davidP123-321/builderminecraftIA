@@ -1,113 +1,46 @@
-<Window x:Class="builderminecraftIA.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Minecraft Builder Pro" Height="900" Width="1360"
-        WindowStartupLocation="CenterScreen">
-    <Grid Margin="12">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="430"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+# Minecraft Builder Pro
 
-        <Border Grid.Column="0" Background="#171717" CornerRadius="12" Padding="14">
-            <StackPanel>
-                <TextBlock Text="Prompt" Foreground="White" FontSize="20" FontWeight="Bold"/>
-                <TextBox x:Name="PromptTextBox"
-                         Height="220"
-                         Margin="0,10,0,0"
-                         FontSize="14"
-                         AcceptsReturn="True"
-                         TextWrapping="Wrap"
-                         VerticalScrollBarVisibility="Auto"
-                         Text="Maison médiévale en pierre, 2 étages, 3 chambres, salon, cuisine, cave, entrée centrale, toit à pignon, style cozy, plan propre, fonctionnel" />
+Application WPF C# qui utilise Ollama pour générer un plan de schéma Minecraft à partir d'un prompt.
 
-                <TextBlock Text="Modèle Ollama" Foreground="White" FontSize="16" Margin="0,16,0,6"/>
-                <ComboBox x:Name="ModelComboBox" SelectedIndex="0" FontSize="14">
-                    <ComboBoxItem Content="llama3.1:8b"/>
-                    <ComboBoxItem Content="qwen2.5-coder:7b"/>
-                    <ComboBoxItem Content="deepseek-coder:6.7b"/>
-                </ComboBox>
+## Fonctionnalités
 
-                <TextBlock Text="Taille" Foreground="White" FontSize="16" Margin="0,16,0,6"/>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="X" Foreground="White" Width="18" VerticalAlignment="Center"/>
-                    <TextBox x:Name="WidthBox" Width="90" Margin="6,0,20,0" Text="24"/>
-                    <TextBlock Text="Z" Foreground="White" Width="18" VerticalAlignment="Center"/>
-                    <TextBox x:Name="DepthBox" Width="90" Margin="6,0,0,0" Text="18"/>
-                </StackPanel>
+- interface utilisateur WPF
+- génération de plan via Ollama
+- vue 2D et 3D
+- export JSON
+- export d'un schéma `.schem` au format de structure exploitable
+- moteur voxel avancé pour la génération de bâtiments
 
-                <TextBlock Text="Style" Foreground="White" FontSize="16" Margin="0,16,0,6"/>
-                <ComboBox x:Name="StyleComboBox" SelectedIndex="0" FontSize="14">
-                    <ComboBoxItem Content="cozy"/>
-                    <ComboBoxItem Content="medieval"/>
-                    <ComboBoxItem Content="modern"/>
-                    <ComboBoxItem Content="survival"/>
-                    <ComboBoxItem Content="castle"/>
-                </ComboBox>
+## Prérequis
 
-                <Button x:Name="GenerateButton"
-                        Content="Générer le schéma"
-                        Height="46"
-                        FontSize="16"
-                        Margin="0,22,0,8"
-                        Click="GenerateButton_Click"/>
+- Windows
+- .NET 8 SDK
+- Ollama installé localement
+- modèle Ollama : `llama3.1:8b`
 
-                <Button x:Name="ExportButton"
-                        Content="Exporter JSON"
-                        Height="46"
-                        FontSize="16"
-                        Margin="0,0,0,8"
-                        Click="ExportButton_Click"/>
+## Lancement
 
-                <Button x:Name="ExportSchemButton"
-                        Content="Exporter .schem"
-                        Height="46"
-                        FontSize="16"
-                        Margin="0,0,0,8"
-                        Click="ExportSchemButton_Click"/>
+```bash
+ollama serve
+ollama pull llama3.1:8b
+dotnet restore
+dotnet build
+dotnet run
+```
 
-                <ProgressBar x:Name="LoadingBar" Height="18" IsIndeterminate="True" Visibility="Collapsed" Margin="0,4,0,0"/>
-                <TextBlock x:Name="StatusText" Foreground="#88d7ff" FontSize="13" Margin="0,12,0,0" Text="Prêt"/>
-            </StackPanel>
-        </Border>
+## Remarque
 
-        <Border Grid.Column="1" Background="#111111" CornerRadius="12" Padding="12">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="260"/>
-                </Grid.RowDefinitions>
+Cette version est une vraie base architecture de générateur de schémas Minecraft : plan JSON → template de bâtiment → voxel world → rendu 3D → export de structure. C'est une base solide pour une version encore plus avancée et plus proche d'un vrai outil de génération de schematics Minecraft.
 
-                <TextBlock Grid.Row="0" Foreground="White" FontSize="20" FontWeight="Bold" Text="Aperçu du schéma"/>
+## Exemple de prompt
 
-                <TabControl Grid.Row="1" Margin="0,10,0,10">
-                    <TabItem Header="2D">
-                        <ScrollViewer>
-                            <Border Background="#0a0a0a" CornerRadius="8" Padding="8">
-                                <Canvas x:Name="PreviewCanvas" Width="700" Height="700" Background="#0a0a0a"/>
-                            </Border>
-                        </ScrollViewer>
-                    </TabItem>
+- "Maison médiévale en pierre, 2 étages, 3 chambres, salon, cuisine, cave"
+- "Base souterraine de survival avec atelier, four, coffres, chambre"
+- "Château en pierre, grande salle, tours, cave, fenêtres, toiture imposante"
 
-                    <TabItem Header="3D">
-                        <Border Background="#0a0a0a" CornerRadius="8" Padding="8">
-                            <Viewport3D x:Name="ThreeDViewport" Width="700" Height="700"/>
-                        </Border>
-                    </TabItem>
-                </TabControl>
+## Objectif suivant
 
-                <TextBox x:Name="JsonOutput"
-                         Grid.Row="2"
-                         FontFamily="Consolas"
-                         FontSize="12"
-                         Foreground="#d9f9ff"
-                         Background="#0d0d0d"
-                         TextWrapping="Wrap"
-                         VerticalScrollBarVisibility="Auto"
-                         IsReadOnly="True"
-                         Text="Le JSON du schéma apparaîtra ici..." />
-            </Grid>
-        </Border>
-    </Grid>
-</Window>
+- exporter un vrai format NBT Minecraft plus complet
+- ajouter des templates plus nombreux (maison, château, ferme, base, temple)
+- améliorer le rendu 3D avec faces visibles et caméra orbitale
+- rendre le moteur encore plus robuste et plus riche

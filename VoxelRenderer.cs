@@ -1,100 +1,59 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace builderminecraftIA
 {
-    public static class HouseBuilder
+    public sealed class VoxelWorld
     {
-        public static VoxelWorld Build(BuildPlan plan)
+        private readonly Dictionary<(int X, int Y, int Z), BlockType> _blocks = new();
+
+        public void SetBlock(int x, int y, int z, BlockType type)
         {
-            var world = new VoxelWorld();
-            var width = plan.Dimensions["x"];
-            var height = plan.Dimensions["y"];
-            var depth = plan.Dimensions["z"];
-
-            // fondamentations et sol
-            world.FillRect(0, width - 1, 0, 0, 0, depth - 1, BlockType.Stone);
-            world.FillRect(1, width - 2, 1, 1, 1, depth - 2, BlockType.StoneBricks);
-
-            // murs extérieurs
-            world.FillRect(0, width - 1, 1, height - 1, 0, 0, BlockType.StoneBricks);
-            world.FillRect(0, width - 1, 1, height - 1, depth - 1, depth - 1, BlockType.StoneBricks);
-            world.FillRect(0, 0, 1, height - 1, 0, depth - 1, BlockType.StoneBricks);
-            world.FillRect(width - 1, width - 1, 1, height - 1, 0, depth - 1, BlockType.StoneBricks);
-
-            // murs intérieurs selon les pièces définies
-            foreach (var room in plan.Rooms)
+            if (type == BlockType.Air)
             {
-                // sol de room
-                world.FillRect(room.X, room.X + room.W - 1, 1, 1, room.Z, room.Z + room.D - 1, BlockType.OakPlanks);
-
-                // contours intérieurs
-                world.FillRect(room.X, room.X + room.W - 1, 2, room.H + 1, room.Z, room.Z, BlockType.StoneBricks);
-                world.FillRect(room.X, room.X + room.W - 1, 2, room.H + 1, room.Z + room.D - 1, room.Z + room.D - 1, BlockType.StoneBricks);
-                world.FillRect(room.X, room.X, 2, room.H + 1, room.Z, room.Z + room.D - 1, BlockType.StoneBricks);
-                world.FillRect(room.X + room.W - 1, room.X + room.W - 1, 2, room.H + 1, room.Z, room.Z + room.D - 1, BlockType.StoneBricks);
+                _blocks.Remove((x, y, z));
+                return;
             }
 
-            // toit
-            for (int x = 0; x < width; x++)
-            for (int z = 0; z < depth; z++)
-                world.SetBlock(x, height, z, BlockType.SprucePlanks);
-
-            // porte d'entrée
-            foreach (var door in plan.Doors)
-            {
-                world.SetBlock(door.X, 2, door.Z, BlockType.OakDoor);
-                world.SetBlock(door.X, 3, door.Z, BlockType.OakDoor);
-            }
-
-            // fenêtres
-            foreach (var window in plan.Windows)
-            {
-                for (int x = window.X; x < window.X + window.Width; x++)
-                for (int y = window.Y; y < window.Y + window.Height; y++)
-                {
-                    world.SetBlock(x, y, 0, BlockType.Glass);
-                    world.SetBlock(x, y, depth - 1, BlockType.Glass);
-                }
-            }
-
-            // escaliers
-            foreach (var stair in plan.Stairs)
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    world.SetBlock(stair.X + i, i + 2, stair.Z, BlockType.Sandstone);
-                }
-            }
-
-            // meubles simples selon le type de pièce
-            foreach (var room in plan.Rooms)
-            {
-                if (room.Type == "bedroom")
-                {
-                    world.SetBlock(room.X + 1, 2, room.Z + 1, BlockType.Bed);
-                }
-                else if (room.Type == "kitchen")
-                {
-                    world.SetBlock(room.X + 2, 2, room.Z + 2, BlockType.CraftingTable);
-                    world.SetBlock(room.X + 3, 2, room.Z + 2, BlockType.Furnace);
-                }
-                else if (room.Type == "living")
-                {
-                    world.SetBlock(room.X + 2, 2, room.Z + 4, BlockType.Barrel);
-                    world.SetBlock(room.X + 4, 2, room.Z + 2, BlockType.Chest);
-                }
-            }
-
-            // lanternes
-            for (int x = 1; x < width - 1; x++)
-            for (int z = 1; z < depth - 1; z++)
-            {
-                if ((x + z) % 5 == 0)
-                    world.SetBlock(x, 3, z, BlockType.Lantern);
-            }
-
-            return world;
+            _blocks[(x, y, z)] = type;
         }
+
+        public BlockType GetBlock(int x, int y, int z)
+        {
+            return _blocks.TryGetValue((x, y, z), out var value) ? value : BlockType.Air;
+        }
+
+        public bool IsEmpty(int x, int y, int z)
+        {
+            return GetBlock(x, y, z) == BlockType.Air;
+        }
+
+        public void FillRect(int x1, int x2, int y1, int y2, int z1, int z2, BlockType type)
+        {
+            var minX = Math.Min(x1, x2);
+            var maxX = Math.Max(x1, x2);
+            var minY = Math.Min(y1, y2);
+            var maxY = Math.Max(y1, y2);
+            var minZ = Math.Min(z1, z2);
+            var maxZ = Math.Max(z1, z2);
+
+            for (int x = minX; x <= maxX; x++)
+            for (int y = minY; y <= maxY; y++)
+            for (int z = minZ; z <= maxZ; z++)
+                SetBlock(x, y, z, type);
+        }
+
+        public void FillColumn(int x, int y1, int y2, int z, BlockType type)
+        {
+            FillRect(x, x, y1, y2, z, z, type);
+        }
+
+        public IEnumerable<(int X, int Y, int Z, BlockType Type)> GetBlocks()
+        {
+            return _blocks.Select(kvp => (kvp.Key.X, kvp.Key.Y, kvp.Key.Z, kvp.Value));
+        }
+
+        public int Count => _blocks.Count;
     }
 }

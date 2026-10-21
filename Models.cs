@@ -1,86 +1,196 @@
 using System;
 using System.Collections.Generic;
-using System.Windows.Media;
-using System.Windows.Media.Media3D;
 
 namespace builderminecraftIA
 {
-    public class VoxelRenderer
+    public static class BuildingTemplate
     {
-        public Model3D BuildModel(VoxelWorld world)
+        public static VoxelWorld Build(BuildPlan plan)
         {
-            var group = new Model3DGroup();
+            var style = plan.Style?.Trim();
+            if (string.IsNullOrWhiteSpace(style))
+                style = "cozy";
 
-            foreach (var (x, y, z, type) in world.GetBlocks())
+            return style.ToLowerInvariant() switch
             {
-                if (type == BlockType.Air)
-                    continue;
+                "castle" => CastleBuilder.Build(plan),
+                "modern" => ModernBuilder.Build(plan),
+                "survival" => SurvivalBuilder.Build(plan),
+                _ => HouseBuilder.Build(plan)
+            };
+        }
+    }
 
-                var mesh = new MeshGeometry3D();
-                AddCube(mesh, x, y, z, 1, 1, 1);
+    public static class HouseBuilder
+    {
+        public static VoxelWorld Build(BuildPlan plan)
+        {
+            var world = new VoxelWorld();
+            var width = Math.Max(8, plan.Dimensions.GetValueOrDefault("x", 18));
+            var height = Math.Max(6, plan.Dimensions.GetValueOrDefault("y", 10));
+            var depth = Math.Max(8, plan.Dimensions.GetValueOrDefault("z", 14));
 
-                var material = new DiffuseMaterial(new SolidColorBrush(GetColor(type)));
-                var model = new GeometryModel3D(mesh, material);
-                group.Children.Add(model);
+            world.FillRect(0, width - 1, 0, 0, 0, depth - 1, BlockType.Stone);
+            world.FillRect(1, width - 2, 1, 1, 1, depth - 2, BlockType.StoneBricks);
+
+            world.FillRect(0, width - 1, 1, height - 1, 0, 0, BlockType.StoneBricks);
+            world.FillRect(0, width - 1, 1, height - 1, depth - 1, depth - 1, BlockType.StoneBricks);
+            world.FillRect(0, 0, 1, height - 1, 0, depth - 1, BlockType.StoneBricks);
+            world.FillRect(width - 1, width - 1, 1, height - 1, 0, depth - 1, BlockType.StoneBricks);
+
+            for (int x = 0; x < width; x++)
+            for (int z = 0; z < depth; z++)
+                world.SetBlock(x, height, z, BlockType.SprucePlanks);
+
+            foreach (var room in plan.Rooms)
+            {
+                var rx = room.X;
+                var rz = room.Z;
+                var rw = room.W;
+                var rd = room.D;
+
+                world.FillRect(rx, rx + rw - 1, 1, 1, rz, rz + rd - 1, BlockType.OakPlanks);
+                world.FillRect(rx, rx + rw - 1, 2, room.H + 1, rz, rz, BlockType.StoneBricks);
+                world.FillRect(rx, rx + rw - 1, 2, room.H + 1, rz + rd - 1, rz + rd - 1, BlockType.StoneBricks);
+                world.FillRect(rx, rx, 2, room.H + 1, rz, rz + rd - 1, BlockType.StoneBricks);
+                world.FillRect(rx + rw - 1, rx + rw - 1, 2, room.H + 1, rz, rz + rd - 1, BlockType.StoneBricks);
             }
 
-            return group;
+            foreach (var door in plan.Doors)
+            {
+                world.SetBlock(door.X, 2, door.Z, BlockType.OakDoor);
+                world.SetBlock(door.X, 3, door.Z, BlockType.OakDoor);
+            }
+
+            foreach (var window in plan.Windows)
+            {
+                for (int x = window.X; x < window.X + window.Width; x++)
+                for (int y = window.Y; y < window.Y + window.Height; y++)
+                {
+                    world.SetBlock(x, y, 0, BlockType.Glass);
+                    world.SetBlock(x, y, depth - 1, BlockType.Glass);
+                }
+            }
+
+            foreach (var stair in plan.Stairs)
+            {
+                for (int i = 0; i < 4; i++)
+                    world.SetBlock(stair.X + i, 2 + i, stair.Z, BlockType.Sandstone);
+            }
+
+            foreach (var room in plan.Rooms)
+            {
+                if (room.Type == "bedroom")
+                    world.SetBlock(room.X + 1, 2, room.Z + 1, BlockType.Bed);
+                else if (room.Type == "kitchen")
+                {
+                    world.SetBlock(room.X + 2, 2, room.Z + 2, BlockType.CraftingTable);
+                    world.SetBlock(room.X + 3, 2, room.Z + 2, BlockType.Furnace);
+                }
+                else if (room.Type == "living")
+                {
+                    world.SetBlock(room.X + 2, 2, room.Z + 4, BlockType.Barrel);
+                    world.SetBlock(room.X + 4, 2, room.Z + 2, BlockType.Chest);
+                }
+            }
+
+            for (int x = 1; x < width - 1; x++)
+            for (int z = 1; z < depth - 1; z++)
+            {
+                if ((x + z) % 5 == 0)
+                    world.SetBlock(x, 3, z, BlockType.Lantern);
+            }
+
+            return world;
         }
+    }
 
-        private static void AddCube(MeshGeometry3D mesh, double x, double y, double z, double w, double h, double d)
+    public static class CastleBuilder
+    {
+        public static VoxelWorld Build(BuildPlan plan)
         {
-            var points = new[]
-            {
-                new Point3D(x, y, z),
-                new Point3D(x + w, y, z),
-                new Point3D(x + w, y + h, z),
-                new Point3D(x, y + h, z),
-                new Point3D(x, y, z + d),
-                new Point3D(x + w, y, z + d),
-                new Point3D(x + w, y + h, z + d),
-                new Point3D(x, y + h, z + d)
-            };
+            var world = new VoxelWorld();
+            var width = Math.Max(12, plan.Dimensions.GetValueOrDefault("x", 22));
+            var height = Math.Max(8, plan.Dimensions.GetValueOrDefault("y", 12));
+            var depth = Math.Max(12, plan.Dimensions.GetValueOrDefault("z", 18));
 
-            var faces = new[]
-            {
-                0, 1, 2, 2, 3, 0,
-                4, 5, 6, 6, 7, 4,
-                0, 4, 7, 7, 3, 0,
-                1, 5, 6, 6, 2, 1,
-                3, 7, 6, 6, 2, 3,
-                0, 1, 5, 5, 4, 0
-            };
+            world.FillRect(0, width - 1, 0, 0, 0, depth - 1, BlockType.Stone);
+            world.FillRect(1, width - 2, 1, 1, 1, depth - 2, BlockType.StoneBricks);
+            world.FillRect(0, width - 1, 1, height - 1, 0, 0, BlockType.StoneBricks);
+            world.FillRect(0, width - 1, 1, height - 1, depth - 1, depth - 1, BlockType.StoneBricks);
+            world.FillRect(0, 0, 1, height - 1, 0, depth - 1, BlockType.StoneBricks);
+            world.FillRect(width - 1, width - 1, 1, height - 1, 0, depth - 1, BlockType.StoneBricks);
 
-            foreach (var point in points)
-                mesh.Positions.Add(point);
+            for (int x = 2; x < width - 2; x += 4)
+            for (int y = 2; y < height - 2; y += 2)
+                world.SetBlock(x, y, 0, BlockType.Glass);
 
-            foreach (var index in faces)
-                mesh.TriangleIndices.Add(index);
+            for (int x = 0; x < width; x++)
+            for (int z = 0; z < depth; z++)
+                if (x % 5 == 0 || z % 5 == 0)
+                    world.SetBlock(x, height, z, BlockType.Quartz);
 
-            for (int i = 0; i < 8; i++)
-                mesh.Normals.Add(new Vector3D(0, 0, 0));
+            return world;
         }
+    }
 
-        private static Color GetColor(BlockType type)
+    public static class ModernBuilder
+    {
+        public static VoxelWorld Build(BuildPlan plan)
         {
-            return type switch
+            var world = new VoxelWorld();
+            var width = Math.Max(10, plan.Dimensions.GetValueOrDefault("x", 16));
+            var height = Math.Max(6, plan.Dimensions.GetValueOrDefault("y", 8));
+            var depth = Math.Max(10, plan.Dimensions.GetValueOrDefault("z", 16));
+
+            world.FillRect(0, width - 1, 0, 0, 0, depth - 1, BlockType.Cobblestone);
+            world.FillRect(1, width - 2, 1, 1, 1, depth - 2, BlockType.OakPlanks);
+            world.FillRect(0, width - 1, 1, height - 1, 0, 0, BlockType.OakPlanks);
+            world.FillRect(0, width - 1, 1, height - 1, depth - 1, depth - 1, BlockType.OakPlanks);
+            world.FillRect(0, 0, 1, height - 1, 0, depth - 1, BlockType.OakPlanks);
+            world.FillRect(width - 1, width - 1, 1, height - 1, 0, depth - 1, BlockType.OakPlanks);
+
+            for (int x = 2; x < width - 2; x++)
+            for (int z = 2; z < depth - 2; z++)
+                world.SetBlock(x, height, z, BlockType.DarkOakPlanks);
+
+            for (int x = 2; x < width - 2; x += 3)
             {
-                BlockType.Stone => Colors.Gray,
-                BlockType.StoneBricks => Colors.DimGray,
-                BlockType.OakPlanks => Colors.SaddleBrown,
-                BlockType.Glass => Colors.LightSkyBlue,
-                BlockType.SprucePlanks => Colors.Sienna,
-                BlockType.Lantern => Colors.Goldenrod,
-                BlockType.Bed => Colors.IndianRed,
-                BlockType.CraftingTable => Colors.Peru,
-                BlockType.Furnace => Colors.SlateGray,
-                BlockType.Barrel => Colors.BurlyWood,
-                BlockType.Chest => Colors.SandyBrown,
-                BlockType.OakDoor => Colors.Brown,
-                BlockType.Sandstone => Colors.Bisque,
-                BlockType.Cobblestone => Colors.DarkGray,
-                _ => Colors.LightGray
-            };
+                world.SetBlock(x, 2, 0, BlockType.Glass);
+                world.SetBlock(x, 3, 0, BlockType.Glass);
+            }
+
+            return world;
+        }
+    }
+
+    public static class SurvivalBuilder
+    {
+        public static VoxelWorld Build(BuildPlan plan)
+        {
+            var world = new VoxelWorld();
+            var width = Math.Max(12, plan.Dimensions.GetValueOrDefault("x", 18));
+            var height = Math.Max(6, plan.Dimensions.GetValueOrDefault("y", 10));
+            var depth = Math.Max(12, plan.Dimensions.GetValueOrDefault("z", 18));
+
+            world.FillRect(0, width - 1, 0, 0, 0, depth - 1, BlockType.Stone);
+            world.FillRect(1, width - 2, 1, 1, 1, depth - 2, BlockType.StoneBricks);
+            world.FillRect(0, width - 1, 1, height - 1, 0, 0, BlockType.StoneBricks);
+            world.FillRect(0, width - 1, 1, height - 1, depth - 1, depth - 1, BlockType.StoneBricks);
+            world.FillRect(0, 0, 1, height - 1, 0, depth - 1, BlockType.StoneBricks);
+            world.FillRect(width - 1, width - 1, 1, height - 1, 0, depth - 1, BlockType.StoneBricks);
+
+            world.SetBlock(2, 2, 2, BlockType.CraftingTable);
+            world.SetBlock(4, 2, 2, BlockType.Furnace);
+            world.SetBlock(6, 2, 2, BlockType.Chest);
+            world.SetBlock(8, 2, 2, BlockType.Bed);
+
+            for (int x = 1; x < width - 1; x++)
+            for (int z = 1; z < depth - 1; z++)
+                if ((x + z) % 6 == 0)
+                    world.SetBlock(x, 3, z, BlockType.Lantern);
+
+            return world;
         }
     }
 }

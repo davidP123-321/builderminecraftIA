@@ -1,38 +1,61 @@
-using System.Windows.Media.Media3D;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace builderminecraftIA
 {
-    public class BoxGeometry3D : Geometry3D
+    public class SchematicExporter
     {
-        public BoxGeometry3D(Point3D origin, double width, double height, double depth)
+        public void Export(VoxelWorld world, string outputPath)
         {
-            var positions = new Point3DCollection
+            var blocks = world.GetBlocks().ToList();
+            if (blocks.Count == 0)
+                throw new InvalidOperationException("Aucun bloc à exporter.");
+
+            var minX = blocks.Min(b => b.X);
+            var maxX = blocks.Max(b => b.X);
+            var minY = blocks.Min(b => b.Y);
+            var maxY = blocks.Max(b => b.Y);
+            var minZ = blocks.Min(b => b.Z);
+            var maxZ = blocks.Max(b => b.Z);
+
+            var width = maxX - minX + 1;
+            var height = maxY - minY + 1;
+            var depth = maxZ - minZ + 1;
+
+            var palette = new Dictionary<BlockType, int>();
+            var bytes = new byte[width * height * depth];
+
+            foreach (var (x, y, z, type) in blocks)
             {
-                new(origin.X, origin.Y, origin.Z),
-                new(origin.X + width, origin.Y, origin.Z),
-                new(origin.X + width, origin.Y + height, origin.Z),
-                new(origin.X, origin.Y + height, origin.Z),
-                new(origin.X, origin.Y, origin.Z + depth),
-                new(origin.X + width, origin.Y, origin.Z + depth),
-                new(origin.X + width, origin.Y + height, origin.Z + depth),
-                new(origin.X, origin.Y + height, origin.Z + depth)
+                if (type == BlockType.Air)
+                    continue;
+
+                if (!palette.ContainsKey(type))
+                    palette[type] = palette.Count + 1;
+
+                var bx = x - minX;
+                var by = y - minY;
+                var bz = z - minZ;
+                var idx = (by * depth * width) + (bz * width) + bx;
+                bytes[idx] = (byte)palette[type];
+            }
+
+            var lines = new List<string>
+            {
+                "# Minecraft schematic export",
+                $"width={width}",
+                $"height={height}",
+                $"depth={depth}",
+                $"minX={minX}",
+                $"minY={minY}",
+                $"minZ={minZ}",
+                "palette=" + string.Join(";", palette.Select(kvp => $"{kvp.Key}:{kvp.Value}")),
+                "blocks=" + string.Join(",", bytes.Select(b => b.ToString()))
             };
 
-            var triangleIndices = new Int32Collection
-            {
-                0,1,2, 2,3,0,
-                4,5,6, 6,7,4,
-                0,4,7, 7,3,0,
-                1,5,6, 6,2,1,
-                3,7,6, 6,2,3,
-                0,1,5, 5,4,0
-            };
-
-            Positions = positions;
-            TriangleIndices = triangleIndices;
+            File.WriteAllLines(outputPath, lines);
         }
-
-        public Point3DCollection Positions { get; }
-        public Int32Collection TriangleIndices { get; }
     }
 }

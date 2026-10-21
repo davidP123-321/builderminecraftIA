@@ -7,15 +7,16 @@ Application WPF C# qui utilise Ollama pour générer un plan de schéma Minecraf
 - interface utilisateur WPF
 - génération de plan via Ollama
 - vue 2D et 3D
-- export du plan JSON
-- export d'un schéma `.schem` (format de structure exploitable par le projet)
+- export JSON
+- export d'un schéma `.schem` au format de structure exploitable
+- moteur voxel avancé pour la génération de bâtiments
 
 ## Prérequis
 
 - Windows
 - .NET 8 SDK
 - Ollama installé localement
-- modèle Ollama téléchargé : `llama3.1:8b`
+- modèle Ollama : `llama3.1:8b`
 
 ## Lancement
 
@@ -29,7 +30,7 @@ dotnet run
 
 ## Remarque
 
-Cette version est une vraie base architecturée de générateur de schéma Minecraft : plan JSON + voxel world + rendu 3D + export de structure. C'est une base solide pour aller vers une version encore plus avancée et proche d'un outil avancé de génération de schematics.
+Cette version est une vraie base architecture de générateur de schémas Minecraft : plan JSON → template de bâtiment → voxel world → rendu 3D → export de structure. C'est une base solide pour une version encore plus avancée et plus proche d'un vrai outil de génération de schematics Minecraft.
 
 ## Exemple de prompt
 
@@ -39,8 +40,7 @@ Cette version est une vraie base architecturée de générateur de schéma Minec
 
 ## Objectif suivant
 
-- rendre le moteur voxel encore plus avancé
-- séparer les modèles par style de bâtiment
-- améliorer l'export au format NBT Minecraft réel
-- ajouter des templates de pièces et de toits plus complexes
-
+- exporter un vrai format NBT Minecraft plus complet
+- ajouter des templates plus nombreux (maison, château, ferme, base, temple)
+- améliorer le rendu 3D avec faces visibles et caméra orbitale
+- rendre le moteur encore plus robuste et plus riche
