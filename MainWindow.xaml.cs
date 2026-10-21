@@ -13,13 +13,13 @@
             <StackPanel>
                 <TextBlock Text="Prompt" Foreground="White" FontSize="20" FontWeight="Bold"/>
                 <TextBox x:Name="PromptTextBox"
-                         Height="210"
+                         Height="220"
                          Margin="0,10,0,0"
                          FontSize="14"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
                          VerticalScrollBarVisibility="Auto"
-                         Text="Maison médiévale en pierre, 2 étages, 3 chambres, salon, cuisine, cave, entrée centrale, toit à pignon, style cozy, schéma propre, fonctionnel" />
+                         Text="Maison médiévale en pierre, 2 étages, 3 chambres, salon, cuisine, cave, entrée centrale, toit à pignon, style cozy, plan propre, fonctionnel" />
 
                 <TextBlock Text="Modèle Ollama" Foreground="White" FontSize="16" Margin="0,16,0,6"/>
                 <ComboBox x:Name="ModelComboBox" SelectedIndex="0" FontSize="14">
@@ -76,7 +76,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="250"/>
+                    <RowDefinition Height="260"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Foreground="White" FontSize="20" FontWeight="Bold" Text="Aperçu du schéma"/>

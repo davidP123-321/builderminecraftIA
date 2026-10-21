@@ -1,6 +1,13 @@
 {
-  "Ollama": {
-    "BaseUrl": "http://localhost:11434",
-    "Model": "llama3.1:8b"
+  "profiles": {
+    "builderminecraftIA": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5000;https://localhost:5001",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
   }
 }

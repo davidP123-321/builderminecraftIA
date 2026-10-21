@@ -28,8 +28,8 @@ namespace builderminecraftIA
                 0,1,5, 5,4,0
             };
 
-            this.Positions = positions;
-            this.TriangleIndices = triangleIndices;
+            Positions = positions;
+            TriangleIndices = triangleIndices;
         }
 
         public Point3DCollection Positions { get; }

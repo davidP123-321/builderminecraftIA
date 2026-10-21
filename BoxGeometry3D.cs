@@ -1,3 +1,5 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-</ResourceDictionary>
+global using System;
+global using System.Collections.Generic;
+global using System.IO;
+global using System.Text;
+global using System.Threading.Tasks;

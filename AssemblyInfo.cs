@@ -1,8 +1,3 @@
-using System.Windows;
-
-namespace builderminecraftIA
-{
-    public partial class App : Application
-    {
-    }
-}
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+</ResourceDictionary>

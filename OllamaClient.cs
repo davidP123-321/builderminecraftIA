@@ -4,61 +4,53 @@ namespace builderminecraftIA
 {
     public class BuildPlan
     {
-        public string name { get; set; } = "Maison";
-        public string style { get; set; } = "cozy";
-        public Dictionary<string, int> dimensions { get; set; } = new();
-        public Dictionary<string, List<string>> materials { get; set; } = new();
-        public List<Room> rooms { get; set; } = new();
-        public List<Stair> stairs { get; set; } = new();
-        public List<Door> doors { get; set; } = new();
-        public List<WindowDef> windows { get; set; } = new();
-        public Dictionary<string, object> roof { get; set; } = new();
-        public List<string> interior { get; set; } = new();
-        public List<string> constraints { get; set; } = new();
+        public string Name { get; set; } = "Maison";
+        public string Style { get; set; } = "cozy";
+        public Dictionary<string, int> Dimensions { get; set; } = new();
+        public Dictionary<string, List<string>> Materials { get; set; } = new();
+        public List<RoomPlan> Rooms { get; set; } = new();
+        public List<StairPlan> Stairs { get; set; } = new();
+        public List<DoorPlan> Doors { get; set; } = new();
+        public List<WindowPlan> Windows { get; set; } = new();
+        public Dictionary<string, object> Roof { get; set; } = new();
+        public List<string> Interior { get; set; } = new();
+        public List<string> Constraints { get; set; } = new();
     }
 
-    public class Room
+    public class RoomPlan
     {
-        public string name { get; set; } = "Room";
-        public int x { get; set; }
-        public int y { get; set; }
-        public int z { get; set; }
-        public int w { get; set; }
-        public int h { get; set; }
-        public int d { get; set; }
-        public string type { get; set; } = "generic";
+        public string Name { get; set; } = "Room";
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+        public int W { get; set; }
+        public int H { get; set; }
+        public int D { get; set; }
+        public string Type { get; set; } = "generic";
     }
 
-    public class Stair
+    public class StairPlan
     {
-        public int x { get; set; }
-        public int y { get; set; }
-        public int z { get; set; }
-        public string direction { get; set; } = "north";
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+        public string Direction { get; set; } = "north";
     }
 
-    public class Door
+    public class DoorPlan
     {
-        public int x { get; set; }
-        public int y { get; set; }
-        public int z { get; set; }
-        public string type { get; set; } = "oak_door";
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+        public string Type { get; set; } = "oak_door";
     }
 
-    public class WindowDef
+    public class WindowPlan
     {
-        public int x { get; set; }
-        public int y { get; set; }
-        public int z { get; set; }
-        public int width { get; set; }
-        public int height { get; set; }
-    }
-
-    public class BlockVoxel
-    {
-        public int x { get; set; }
-        public int y { get; set; }
-        public int z { get; set; }
-        public string block { get; set; } = "stone";
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
     }
 }

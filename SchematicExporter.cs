@@ -1,86 +1,45 @@
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Shapes;
+using System;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace builderminecraftIA
 {
-    public class PreviewBuilder
+    public class OllamaClient
     {
-        public void Draw(BuildPlan plan, Canvas canvas)
+        private readonly HttpClient _http = new();
+
+        public async Task<string> AskAsync(string prompt, string model)
         {
-            canvas.Children.Clear();
-
-            var width = plan.dimensions["x"];
-            var depth = plan.dimensions["z"];
-            const double cell = 16;
-
-            canvas.Width = width * cell + 30;
-            canvas.Height = depth * cell + 30;
-
-            var background = new Rectangle
+            var payload = new
             {
-                Width = canvas.Width,
-                Height = canvas.Height,
-                Fill = Brushes.Black
+                model = model,
+                stream = false,
+                format = "json",
+                messages = new[]
+                {
+                    new { role = "system", content = "Tu es un générateur de schémas Minecraft. Réponds uniquement en JSON strict valide, sans aucun texte libre." },
+                    new { role = "user", content = prompt }
+                }
             };
-            canvas.Children.Add(background);
 
-            foreach (var room in plan.rooms)
-            {
-                var rect = new Rectangle
-                {
-                    Width = room.w * cell,
-                    Height = room.d * cell,
-                    Fill = Brushes.DarkSlateGray,
-                    Stroke = Brushes.White,
-                    StrokeThickness = 1
-                };
+            var json = JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                Canvas.SetLeft(rect, room.x * cell + 10);
-                Canvas.SetTop(rect, room.z * cell + 10);
-                canvas.Children.Add(rect);
+            var response = await _http.PostAsync("http://localhost:11434/api/chat", content);
+            var body = await response.Content.ReadAsStringAsync();
 
-                var label = new TextBlock
-                {
-                    Text = room.name,
-                    Foreground = Brushes.White,
-                    FontSize = 10
-                };
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"Erreur Ollama: {(int)response.StatusCode} - {body}");
 
-                Canvas.SetLeft(label, room.x * cell + 14);
-                Canvas.SetTop(label, room.z * cell + 12);
-                canvas.Children.Add(label);
-            }
+            using var doc = JsonDocument.Parse(body);
+            var text = doc.RootElement.GetProperty("message").GetProperty("content").GetString();
 
-            foreach (var door in plan.doors)
-            {
-                var rect = new Rectangle
-                {
-                    Width = 10,
-                    Height = 10,
-                    Fill = Brushes.Orange
-                };
+            if (string.IsNullOrWhiteSpace(text))
+                throw new Exception("Réponse Ollama vide.");
 
-                Canvas.SetLeft(rect, door.x * cell + 10);
-                Canvas.SetTop(rect, door.z * cell + 10);
-                canvas.Children.Add(rect);
-            }
-
-            foreach (var window in plan.windows)
-            {
-                var rect = new Rectangle
-                {
-                    Width = window.width * cell,
-                    Height = window.height * cell,
-                    Fill = Brushes.Cyan,
-                    Stroke = Brushes.LightCyan,
-                    StrokeThickness = 1
-                };
-
-                Canvas.SetLeft(rect, window.x * cell + 10);
-                Canvas.SetTop(rect, window.z * cell + 10);
-                canvas.Children.Add(rect);
-            }
+            return text;
         }
     }
 }

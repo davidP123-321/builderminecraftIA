@@ -1,36 +1,46 @@
 # Minecraft Builder Pro
 
-Version WPF + Ollama pour générer un plan de schéma Minecraft à partir d'un prompt.
+Application WPF C# qui utilise Ollama pour générer un plan de schéma Minecraft à partir d'un prompt.
 
 ## Fonctionnalités
 
+- interface utilisateur WPF
 - génération de plan via Ollama
-- aperçu 2D
-- aperçu 3D basique
-- export JSON
-- export `.schem` de structure Minecraft
+- vue 2D et 3D
+- export du plan JSON
+- export d'un schéma `.schem` (format de structure exploitable par le projet)
 
-## Lancer le projet
+## Prérequis
+
+- Windows
+- .NET 8 SDK
+- Ollama installé localement
+- modèle Ollama téléchargé : `llama3.1:8b`
+
+## Lancement
 
 ```bash
+ollama serve
+ollama pull llama3.1:8b
 dotnet restore
 dotnet build
 dotnet run
 ```
 
-Assurez-vous d'avoir Ollama installé et de lancer un modèle local, par exemple :
+## Remarque
 
-```bash
-ollama serve
-ollama pull llama3.1:8b
-```
+Cette version est une vraie base architecturée de générateur de schéma Minecraft : plan JSON + voxel world + rendu 3D + export de structure. C'est une base solide pour aller vers une version encore plus avancée et proche d'un outil avancé de génération de schematics.
 
 ## Exemple de prompt
 
 - "Maison médiévale en pierre, 2 étages, 3 chambres, salon, cuisine, cave"
-- "Base souterraine de survival avec ferme automatique, four, coffres, atelier"
-- "Château, grande salle, tours, cave, fenêtres"
+- "Base souterraine de survival avec atelier, four, coffres, chambre"
+- "Château en pierre, grande salle, tours, cave, fenêtres, toiture imposante"
 
-## Remarque
+## Objectif suivant
 
-Le projet est un prototype fonctionnel architecturé pour générer des schémas Minecraft à partir d'un prompt. Le système est conçu pour être extensible vers un générateur plus avancé.
+- rendre le moteur voxel encore plus avancé
+- séparer les modèles par style de bâtiment
+- améliorer l'export au format NBT Minecraft réel
+- ajouter des templates de pièces et de toits plus complexes
+
