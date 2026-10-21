@@ -1,13 +1,36 @@
-{
-  "profiles": {
-    "builderminecraftIA": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": false,
-      "applicationUrl": "http://localhost:5000;https://localhost:5001",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    }
-  }
-}
+# Minecraft Builder Pro
+
+Version WPF + Ollama pour générer un plan de schéma Minecraft à partir d'un prompt.
+
+## Fonctionnalités
+
+- génération de plan via Ollama
+- aperçu 2D
+- aperçu 3D basique
+- export JSON
+- export `.schem` de structure Minecraft
+
+## Lancer le projet
+
+```bash
+dotnet restore
+dotnet build
+dotnet run
+```
+
+Assurez-vous d'avoir Ollama installé et de lancer un modèle local, par exemple :
+
+```bash
+ollama serve
+ollama pull llama3.1:8b
+```
+
+## Exemple de prompt
+
+- "Maison médiévale en pierre, 2 étages, 3 chambres, salon, cuisine, cave"
+- "Base souterraine de survival avec ferme automatique, four, coffres, atelier"
+- "Château, grande salle, tours, cave, fenêtres"
+
+## Remarque
+
+Le projet est un prototype fonctionnel architecturé pour générer des schémas Minecraft à partir d'un prompt. Le système est conçu pour être extensible vers un générateur plus avancé.

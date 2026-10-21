@@ -40,7 +40,6 @@ namespace builderminecraftIA
                 var model = ((ComboBoxItem)ModelComboBox.SelectedItem!).Content?.ToString() ?? "llama3.1:8b";
 
                 var rawJson = await _ollama.AskAsync(prompt, model);
-
                 var plan = JsonSerializer.Deserialize<BuildPlan>(rawJson, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
@@ -181,34 +180,67 @@ Sortie JSON obligatoire :
         private void Render3DPreview(List<BlockVoxel> voxels)
         {
             ThreeDViewport.Children.Clear();
-            var modelGroup = new Model3DGroup();
 
+            var group = new Model3DGroup();
             foreach (var voxel in voxels)
             {
-                if (voxel.block == "air")
-                    continue;
+                var mesh = new MeshGeometry3D();
+                AddBox(mesh, voxel.x, voxel.y, voxel.z, 1, 1, 1);
 
-                var box = new BoxGeometry3D(new Point3D(voxel.x, voxel.y, voxel.z), 1, 1, 1);
                 var material = new DiffuseMaterial(new SolidColorBrush(BlockToColor(voxel.block)));
-                var model = new GeometryModel3D(box, material);
-                modelGroup.Children.Add(model);
+                var model = new GeometryModel3D(mesh, material);
+                group.Children.Add(model);
             }
 
-            var light = new AmbientLight(Colors.White);
-            var directional = new DirectionalLight(Colors.White, new Vector3D(-1, -2, -3));
+            var visual = new ModelVisual3D { Content = group };
+            ThreeDViewport.Children.Add(visual);
 
-            var camera = new PerspectiveCamera
+            var light1 = new AmbientLight(Colors.White);
+            var light2 = new DirectionalLight(Colors.White, new Vector3D(-1, -2, -3));
+            ThreeDViewport.Children.Add(new ModelVisual3D { Content = light1 });
+            ThreeDViewport.Children.Add(new ModelVisual3D { Content = light2 });
+
+            ThreeDViewport.Camera = new PerspectiveCamera
             {
-                Position = new Point3D(16, 18, 28),
-                LookDirection = new Vector3D(-8, -12, -18),
+                Position = new Point3D(18, 20, 28),
+                LookDirection = new Vector3D(-10, -10, -20),
                 UpDirection = new Vector3D(0, 1, 0),
                 FieldOfView = 45
             };
+        }
 
-            ThreeDViewport.Camera = camera;
-            ThreeDViewport.Children.Add(new ModelVisual3D { Content = light });
-            ThreeDViewport.Children.Add(new ModelVisual3D { Content = directional });
-            ThreeDViewport.Children.Add(new ModelVisual3D { Content = modelGroup });
+        private static void AddBox(MeshGeometry3D mesh, double x, double y, double z, double w, double h, double d)
+        {
+            var p = new[]
+            {
+                new Point3D(x, y, z),
+                new Point3D(x + w, y, z),
+                new Point3D(x + w, y + h, z),
+                new Point3D(x, y + h, z),
+                new Point3D(x, y, z + d),
+                new Point3D(x + w, y, z + d),
+                new Point3D(x + w, y + h, z + d),
+                new Point3D(x, y + h, z + d)
+            };
+
+            var faces = new[]
+            {
+                0, 1, 2, 2, 3, 0,
+                4, 5, 6, 6, 7, 4,
+                0, 4, 7, 7, 3, 0,
+                1, 5, 6, 6, 2, 1,
+                3, 7, 6, 6, 2, 3,
+                0, 1, 5, 5, 4, 0
+            };
+
+            foreach (var point in p)
+                mesh.Positions.Add(point);
+
+            foreach (var index in faces)
+                mesh.TriangleIndices.Add(index);
+
+            for (var i = 0; i < 8; i++)
+                mesh.Normals.Add(new Vector3D(0, 0, 0));
         }
 
         private static Color BlockToColor(string block)

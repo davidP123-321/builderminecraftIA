@@ -12,18 +12,18 @@ namespace builderminecraftIA
 
             var width = plan.dimensions["x"];
             var depth = plan.dimensions["z"];
-            double cell = 16;
+            const double cell = 16;
 
             canvas.Width = width * cell + 30;
             canvas.Height = depth * cell + 30;
 
-            var bg = new Rectangle
+            var background = new Rectangle
             {
                 Width = canvas.Width,
                 Height = canvas.Height,
                 Fill = Brushes.Black
             };
-            canvas.Children.Add(bg);
+            canvas.Children.Add(background);
 
             foreach (var room in plan.rooms)
             {
@@ -38,7 +38,6 @@ namespace builderminecraftIA
 
                 Canvas.SetLeft(rect, room.x * cell + 10);
                 Canvas.SetTop(rect, room.z * cell + 10);
-
                 canvas.Children.Add(rect);
 
                 var label = new TextBlock

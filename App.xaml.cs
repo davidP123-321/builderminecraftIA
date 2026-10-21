@@ -1,8 +1,6 @@
-using System.Windows;
-
-namespace builderminecraftIA
-{
-    public partial class App : Application
-    {
-    }
-}
+<Application x:Class="builderminecraftIA.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources />
+</Application>

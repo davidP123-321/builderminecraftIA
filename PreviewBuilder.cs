@@ -88,8 +88,11 @@ namespace builderminecraftIA
                 {
                     for (int yy = window.y; yy < window.y + window.height; yy++)
                     {
-                        result.Add(new BlockVoxel { x = xx, y = yy, z = 0, block = "glass" });
-                        result.Add(new BlockVoxel { x = xx, y = yy, z = z - 1, block = "glass" });
+                        if (yy >= 1 && yy < y)
+                        {
+                            result.Add(new BlockVoxel { x = xx, y = yy, z = 0, block = "glass" });
+                            result.Add(new BlockVoxel { x = xx, y = yy, z = z - 1, block = "glass" });
+                        }
                     }
                 }
             }
